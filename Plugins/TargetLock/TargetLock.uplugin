@@ -1,0 +1,31 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"EngineVersion": "5.2",
+	"VersionName": "0.1",
+	"FriendlyName": "GAS Target Locking",
+	"Description": "A C++ Gameplay Ability using the control rotation to rotate the ability user towards a target.",
+	"Category": "Other",
+	"CreatedBy": "Floyd Seiffert",
+	"CreatedByURL": "https://floydseiffertdev.wordpress.com/",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "TargetLock",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		}
+	]
+}
