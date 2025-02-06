@@ -14,10 +14,11 @@ struct TARGETLOCK_API FStruct_TargetLockData
 	GENERATED_BODY()
 
 	//Angle in Degrees
-	//The angle where the rotation 
+	//The angle the rotation should not overstep
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Units = "Deg"))
 	float MaxAngleToTarget = 40;
 
+	//the angle where the rotation will start to go back towards the target
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Units = "Deg"))
 	float AngleToStartLerp = 15;
 
@@ -101,7 +102,7 @@ protected:
 	TObjectPtr<UCameraComponent> CameraComponent;
 
 	//The configuration for the task
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS | Target Locking Task", meta = (Units = "Deg"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS | Target Locking Task")
 	FStruct_TargetLockData Configuration;
 
 	//The target we want to keep in the center of the camera

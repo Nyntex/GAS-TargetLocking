@@ -102,8 +102,18 @@ bool UTargetLockUtilities::LineOfSightCheck(const UObject* WorldContext, const F
 
 float UTargetLockUtilities::FindRotationAddition(float RotationTarget, float RotationOrigin)
 {
-	if (RotationOrigin < 0) RotationOrigin += 360;
-	if (RotationTarget < 0) RotationTarget += 360;
+	if (RotationOrigin < 0 || RotationTarget < 0)
+	{
+		int TimesToIncreaseTarget = FMath::TruncToInt(RotationTarget / 360);
+		int TimesToIncreaseOrigin = FMath::TruncToInt(RotationOrigin / 360);
+		return FindRotationAddition(360 + RotationTarget - (360 * TimesToIncreaseTarget), 360 + RotationOrigin - (360 * TimesToIncreaseOrigin));
+	}
+	if (RotationTarget > 360 || RotationOrigin > 360)
+	{
+		int TimesToIncreaseTarget = FMath::TruncToInt(RotationTarget / 360);
+		int TimesToIncreaseOrigin = FMath::TruncToInt(RotationOrigin / 360);
+		return FindRotationAddition(RotationTarget - (360 * TimesToIncreaseTarget), RotationOrigin - (360 * TimesToIncreaseOrigin));
+	}
 	
 	if (RotationTarget < RotationOrigin)
 	{

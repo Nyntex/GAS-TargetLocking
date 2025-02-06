@@ -7,7 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-#define DEBUG_ENABLED false
+#define DEBUG_ENABLED true
 
 UGASTask_TargetLock::UGASTask_TargetLock(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -125,12 +125,13 @@ void UGASTask_TargetLock::SetupTargetLock(UCameraComponent* OptionalCam, AActor*
 		if (dist < Configuration.MaxDistanceToStartTargetLock && dist < ClosestTarget)
 		{
 			const TArray<AActor*> IgnoreList{ Actor, OwningActor };
-			if (UTargetLockUtilities::LineOfSightCheckFromCompToActor(this, CameraComponent, Actor, IgnoreList, 75) ||
-				UTargetLockUtilities::LineOfSightCheckFromActorToActor(this, OwningActor, Actor, IgnoreList, 75))
-			{
-				ClosestTarget = dist;
-				Target = Actor;
-			}
+			
+			if(Configuration.DoLineOfSightCheck && !(UTargetLockUtilities::LineOfSightCheckFromCompToActor(this, CameraComponent, Actor, IgnoreList, 75) ||
+				UTargetLockUtilities::LineOfSightCheckFromActorToActor(this, OwningActor, Actor, IgnoreList, 75)))
+				continue;
+
+			ClosestTarget = dist;
+			Target = Actor;
 		}
 	}
 
@@ -237,22 +238,29 @@ void UGASTask_TargetLock::LerpTargetLocked(double DeltaTime)
 		CalcYaw *= DeltaTime * Configuration.HardRotateSpeedMultiplier;
 		CalcPitch *= DeltaTime * Configuration.HardRotateSpeedMultiplier;
 
+		// if (ControllerPitch > 360) ControllerPitch -=360;
+		// if (ControllerPitch < 0) ControllerPitch +=360;
+		// if (ControllerYaw > 360) ControllerYaw -=360;
+		// if (ControllerYaw < 0) ControllerYaw +=360;
+		// Controller->SetControlRotation(FRotator(ControllerPitch, ControllerYaw, Controller->GetControlRotation().Roll));
+		
 		//Forcefully rotate Camera
 		Controller->SetControlRotation(Controller->GetControlRotation() + FRotator(CalcPitch, CalcYaw, 0));
+		//Controller->AddYawInput(0.001); //this ensures that the rotation actually updates....
 
 		//debug prints and stuff
 #if WITH_EDITOR
 		if (GEngine && DEBUG_ENABLED)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "Hard Rotate Camera");
 			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, FString::SanitizeFloat(Angle));
 		}
 #endif
 	}
-
+	
 	//Do the smooth rotation towards the target
 	if (Angle >= Configuration.AngleToStartLerp)
 	{
+			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "Hard Rotate Camera");
 
 		//Make smooth yaw input
 		const float TargetYaw = TargetSoftRotator.Yaw;
@@ -266,7 +274,14 @@ void UGASTask_TargetLock::LerpTargetLocked(double DeltaTime)
 		float CalcPitch = UTargetLockUtilities::FindRotationAddition(TargetPitch, ControllerPitch);
 		CalcPitch *= Configuration.RotateSpeed * DeltaTime;
 
+		// if (ControllerPitch > 360) ControllerPitch -=360;
+		// if (ControllerPitch < 0) ControllerPitch +=360;
+		// if (ControllerYaw > 360) ControllerYaw -=360;
+		// if (ControllerYaw < 0) ControllerYaw +=360;
+		// Controller->SetControlRotation(FRotator(ControllerPitch, ControllerYaw, Controller->GetControlRotation().Roll) + FRotator(0, 0.001, 0));
+		//
 		Controller->SetControlRotation(Controller->GetControlRotation() + FRotator(CalcPitch, CalcYaw, 0));
+		//Controller->AddYawInput(0.001); //this ensures that the rotation actually updates....
 
 		//debug prints
 #if WITH_EDITOR

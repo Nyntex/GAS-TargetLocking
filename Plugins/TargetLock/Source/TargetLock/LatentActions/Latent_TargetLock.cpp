@@ -118,27 +118,28 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 	}
 #endif
 
-	if (Angle + 1.f >= MaxAngleToTarget)
+	if (Angle >= MaxAngleToTarget)
 	{
 
 		const float TargetYaw = TargetSoftRotator.Yaw;
 		float ControllerYaw = Controller->GetControlRotation().Yaw;
-		ControllerYaw -= ControllerYaw - TargetYaw >= 180 ? 360 : 0; //this ensures that it doesn't matter what the rotations are
 		float CalcYaw = TargetHardRotator.Yaw - ControllerYaw;
 		CalcYaw *= DeltaTime * HardRotateSpeedMultiplier;
 
 
 		const float TargetPitch = TargetSoftRotator.Pitch;
 		float ControllerPitch = Controller->GetControlRotation().Pitch;
-		ControllerPitch -= ControllerPitch - TargetPitch >= 180 ? 360 : 0;
 		float CalcPitch = TargetHardRotator.Pitch - ControllerPitch;
 		CalcPitch *= -DeltaTime * HardRotateSpeedMultiplier;
 
-		//Forcefully rotate Camera
-		//Controller->AddYawInput(CalcYaw);
-		//Controller->AddPitchInput(CalcPitch);
+		if (ControllerPitch > 360) ControllerPitch -=360;
+		if (ControllerPitch < 0) ControllerPitch +=360;
+		if (ControllerYaw > 360) ControllerYaw -=360;
+		if (ControllerYaw < 0) ControllerYaw +=360;
+		Controller->SetControlRotation(FRotator(ControllerPitch, ControllerYaw, Controller->GetControlRotation().Roll));
 
 		Controller->SetControlRotation(FRotator(-CalcPitch, CalcYaw, 0) + Controller->GetControlRotation());
+		Controller->AddYawInput(0.001); //this ensures that the rotation actually updates....
 
 		//debug prints and stuff
 #if WITH_EDITOR && DEBUG_ENABLED
@@ -156,8 +157,6 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 		//Make smooth yaw input
 		const float TargetYaw = TargetSoftRotator.Yaw;
 		float ControllerYaw = Controller->GetControlRotation().Yaw;
-		ControllerYaw -= ControllerYaw - TargetYaw >= 180 ? 360 : 0;
-		//ControllerYaw += 180;
 		float CalcYaw = (TargetYaw)-ControllerYaw;
 		CalcYaw *= RotateSpeed * DeltaTime;
 
@@ -165,11 +164,17 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 		//make smooth pitch input
 		const float TargetPitch = TargetSoftRotator.Pitch;
 		float ControllerPitch = Controller->GetControlRotation().Pitch;
-		ControllerPitch -= ControllerPitch - TargetPitch >= 180 ? 360 : 0;
 		float CalcPitch = TargetSoftRotator.Pitch - ControllerPitch;
 		CalcPitch *= -RotateSpeed * DeltaTime;
 
+		if (ControllerPitch > 360) ControllerPitch -=360;
+		if (ControllerPitch < 0) ControllerPitch +=360;
+		if (ControllerYaw > 360) ControllerYaw -=360;
+		if (ControllerYaw < 0) ControllerYaw +=360;
+		Controller->SetControlRotation(FRotator(ControllerPitch, ControllerYaw, Controller->GetControlRotation().Roll));
+
 		Controller->SetControlRotation(FRotator(-CalcPitch, CalcYaw, 0) + Controller->GetControlRotation());
+		Controller->AddYawInput(0.001); //this ensures that the rotation actually updates....
 
 		//debug prints
 #if WITH_EDITOR && DEBUG_ENABLED
