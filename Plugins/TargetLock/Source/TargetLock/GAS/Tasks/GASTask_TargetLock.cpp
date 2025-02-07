@@ -226,28 +226,19 @@ void UGASTask_TargetLock::LerpTargetLocked(double DeltaTime)
 	//Do the hard rotation, if needed based on our look at angle to the target
 	if (Angle >= Configuration.MaxAngleToTarget)
 	{
-
 		const float TargetYaw = TargetHardRotator.Yaw;
 		float ControllerYaw = Controller->GetControlRotation().Yaw;
 		float CalcYaw = UTargetLockUtilities::FindRotationAddition(TargetYaw, ControllerYaw);
+		CalcYaw *= DeltaTime * Configuration.HardRotateSpeedMultiplier;
 		
 		const float TargetPitch = TargetHardRotator.Pitch;
 		float ControllerPitch = Controller->GetControlRotation().Pitch;
 		float CalcPitch = UTargetLockUtilities::FindRotationAddition(TargetPitch, ControllerPitch);
-		
-		CalcYaw *= DeltaTime * Configuration.HardRotateSpeedMultiplier;
 		CalcPitch *= DeltaTime * Configuration.HardRotateSpeedMultiplier;
 
-		// if (ControllerPitch > 360) ControllerPitch -=360;
-		// if (ControllerPitch < 0) ControllerPitch +=360;
-		// if (ControllerYaw > 360) ControllerYaw -=360;
-		// if (ControllerYaw < 0) ControllerYaw +=360;
-		// Controller->SetControlRotation(FRotator(ControllerPitch, ControllerYaw, Controller->GetControlRotation().Roll));
-		
 		//Forcefully rotate Camera
 		Controller->SetControlRotation(Controller->GetControlRotation() + FRotator(CalcPitch, CalcYaw, 0));
-		//Controller->AddYawInput(0.001); //this ensures that the rotation actually updates....
-
+		
 		//debug prints and stuff
 #if WITH_EDITOR
 		if (GEngine && DEBUG_ENABLED)
@@ -274,15 +265,8 @@ void UGASTask_TargetLock::LerpTargetLocked(double DeltaTime)
 		float CalcPitch = UTargetLockUtilities::FindRotationAddition(TargetPitch, ControllerPitch);
 		CalcPitch *= Configuration.RotateSpeed * DeltaTime;
 
-		// if (ControllerPitch > 360) ControllerPitch -=360;
-		// if (ControllerPitch < 0) ControllerPitch +=360;
-		// if (ControllerYaw > 360) ControllerYaw -=360;
-		// if (ControllerYaw < 0) ControllerYaw +=360;
-		// Controller->SetControlRotation(FRotator(ControllerPitch, ControllerYaw, Controller->GetControlRotation().Roll) + FRotator(0, 0.001, 0));
-		//
 		Controller->SetControlRotation(Controller->GetControlRotation() + FRotator(CalcPitch, CalcYaw, 0));
-		//Controller->AddYawInput(0.001); //this ensures that the rotation actually updates....
-
+		
 		//debug prints
 #if WITH_EDITOR
 		if (GEngine && DEBUG_ENABLED)

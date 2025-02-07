@@ -131,16 +131,8 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 		float ControllerPitch = Controller->GetControlRotation().Pitch;
 		float CalcPitch = TargetHardRotator.Pitch - ControllerPitch;
 		CalcPitch *= -DeltaTime * HardRotateSpeedMultiplier;
-
-		if (ControllerPitch > 360) ControllerPitch -=360;
-		if (ControllerPitch < 0) ControllerPitch +=360;
-		if (ControllerYaw > 360) ControllerYaw -=360;
-		if (ControllerYaw < 0) ControllerYaw +=360;
-		Controller->SetControlRotation(FRotator(ControllerPitch, ControllerYaw, Controller->GetControlRotation().Roll));
-
 		Controller->SetControlRotation(FRotator(-CalcPitch, CalcYaw, 0) + Controller->GetControlRotation());
-		Controller->AddYawInput(0.001); //this ensures that the rotation actually updates....
-
+		
 		//debug prints and stuff
 #if WITH_EDITOR && DEBUG_ENABLED
 		if (GEngine)
@@ -167,15 +159,8 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 		float CalcPitch = TargetSoftRotator.Pitch - ControllerPitch;
 		CalcPitch *= -RotateSpeed * DeltaTime;
 
-		if (ControllerPitch > 360) ControllerPitch -=360;
-		if (ControllerPitch < 0) ControllerPitch +=360;
-		if (ControllerYaw > 360) ControllerYaw -=360;
-		if (ControllerYaw < 0) ControllerYaw +=360;
-		Controller->SetControlRotation(FRotator(ControllerPitch, ControllerYaw, Controller->GetControlRotation().Roll));
-
 		Controller->SetControlRotation(FRotator(-CalcPitch, CalcYaw, 0) + Controller->GetControlRotation());
-		Controller->AddYawInput(0.001); //this ensures that the rotation actually updates....
-
+		
 		//debug prints
 #if WITH_EDITOR && DEBUG_ENABLED
 		if (GEngine)

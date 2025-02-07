@@ -40,15 +40,16 @@ class TARGETLOCK_API ULatent_TargetLock : public UBlueprintFunctionLibrary
 	 * @param LatentInfo					Variable to hold the information required to process a Latent function. Hidden
 	 * @param InputPins						Different Types of Input Pins
 	 * @param OutputPins					Different Types of OutputPins
-	 * @param CameraComponent				The Camera that should get locked onto a target.
-	 * @param LockTarget					Optional. If Lock Target is not given it will automatically try to find a target of type UClass_BaseEnemy
-	 * @param MaxAngleToTarget				The maximum angle the camera should be allowed to hold to the Lock Target before it gets forced into position
-	 * @param AngleToStartLerp				The Angle at which point the camera will start to smoothly change it's rotation towards the given angle to the target
+	 * @param CameraComponent				Required: The camera that should get locked onto a target.
+	 * @param LockableClasses				Class type to lock on. Required if no LockTarget is given.
+	 * @param LockTarget					Optional. If Lock Target is not given it will automatically try to find a target of given lockable class type.
+	 * @param MaxAngleToTarget				The maximum angle the camera should be allowed to hold to the Lock Target before it gets forced into position.
+	 * @param AngleToStartLerp				The Angle at which point the camera will start to smoothly change its rotation towards the given angle to the target.
 	 * @param RotateSpeed					The Speed at which the Camera will rotate.
-	 * @param HardRotateSpeedMultiplier		The additional speed the camera will rotate at when angel is greater than MaxAngleToTarget
-	 * @param MaxDistanceToStartTargetLock	The maximimum distance the camera will allow to find a target to lock on to
-	 * @param DoLineOfSightCheck			If there should be an initial line of sight check to see if the target is behind a wall
-	 * @param ContinuousLineOfSightCheck	If there should be a continuous line of sight check to see if the chosen target stays in sight. Will Cancel the action if target is behind walls
+	 * @param HardRotateSpeedMultiplier		The additional speed the camera will rotate at when angel is greater than MaxAngleToTarget.
+	 * @param MaxDistanceToStartTargetLock	The maximum distance the camera will allow to find a target to lock on to.
+	 * @param DoLineOfSightCheck			If there should be an initial line of sight check to see if the target is behind a wall.
+	 * @param ContinuousLineOfSightCheck	If there should be a continuous line of sight check to see if the chosen target stays in sight. Will Cancel the action if target is behind walls.
 	 *
 	 */
 	UFUNCTION(BlueprintCallable, meta=(WorldContext="WorldContext", Latent, LatentInfo="LatentInfo", ExpandEnumAsExecs="InputPins,OutputPins"), Category="Latent | TargetLock")
