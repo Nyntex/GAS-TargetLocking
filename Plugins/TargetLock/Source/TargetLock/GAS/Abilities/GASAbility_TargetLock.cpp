@@ -31,7 +31,7 @@ void UGASAbility_TargetLock::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 	//End Target Lock if we are already locking onto a something
 	if (IsLockingOnTarget)
 	{
-		(FString("Stopping Target Lock"), FColor::Green);
+		SCOPED_NAMED_EVENT_FSTRING(FString("Stopping Target Lock"), FColor::Green);
 		IsLockingOnTarget = false;
 		if (TargetLockTask)
 		{

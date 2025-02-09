@@ -15,42 +15,42 @@ struct TARGETLOCK_API FStruct_TargetLockData
 
 	//Angle in Degrees
 	//The angle the rotation should not overstep
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Units = "Deg"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Units = "Deg"), Category = "GAS|TargetLockData")
 	float MaxAngleToTarget = 40;
 
 	//the angle where the rotation will start to go back towards the target
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Units = "Deg"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Units = "Deg"), Category = "GAS|TargetLockData")
 	float AngleToStartLerp = 15;
 
 	//Rotate Speed. 1 means it takes ~1 second to reach the desired rotation. Higher Values = Faster Rotation.
 	//Beware that very high values may result in overshooting because this value directly multiplies the value
 	//that gets added to the pitch/yaw 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS|TargetLockData")
 	float RotateSpeed = 4;
 
 	//This ignores "RotateSpeed" by default. X < 1 makes it slower, X > 1 makes it faster.
 	//Beware that very high values may result in overshooting because this value directly multiplies the value
 	//that gets added to the pitch/yaw
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS|TargetLockData")
 	float HardRotateSpeedMultiplier = 10;
 
 	//How far away a unit is allowed to be eligible for target locking to be applied.
 	//This is measured in unreal units / cm.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Units = "CM"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Units = "CM"), Category = "GAS|TargetLockData")
 	float MaxDistanceToStartTargetLock = 1500;
 
 	//Should we do a LineOfSight Check when we find our Target for the first time
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS|TargetLockData")
 	bool DoLineOfSightCheck = false;
 
 	//Should we continuously check if the target is still in Line of Sight?
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GAS|TargetLockData")
 	bool ContinuousLineOfSightCheck = false;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS|TargetLockData")
 	TArray<TSubclassOf<AActor>> LockableClasses;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "GAS|TargetLockData")
 	TSubclassOf<AActor> TargetLockVisualizeActorClass;
 };
 
@@ -98,7 +98,7 @@ protected:
 	void LerpTargetLocked(double DeltaTime);
 
 	//The camera that gets rotated towards the @CameraLockTarget
-	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn="true"))
+	UPROPERTY(BlueprintReadOnly, meta=(ExposeOnSpawn="true"), Category = "GAS | Target Locking Task")
 	TObjectPtr<UCameraComponent> CameraComponent;
 
 	//The configuration for the task

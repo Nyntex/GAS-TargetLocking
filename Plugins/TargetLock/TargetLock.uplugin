@@ -15,6 +15,11 @@
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
+	"SupportedTargetPlatforms": [
+		"Win64",
+		"Android",
+		"Linux"
+		],
 	"Modules": [
 		{
 			"Name": "TargetLock",

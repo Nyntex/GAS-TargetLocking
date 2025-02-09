@@ -2,11 +2,10 @@
 
 
 #include "Latent_TargetLock.h"
-
+#include "Engine/Engine.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
-#define DEBUG_ENABLED false
 #define LATENT_RESPONSE_INFO LatentActionInfo.ExecutionFunction, LatentActionInfo.Linkage, LatentActionInfo.CallbackTarget
 
 void ULatent_TargetLock::LatentTargetLock(UObject* WorldContext, FLatentActionInfo LatentInfo,
@@ -15,6 +14,12 @@ void ULatent_TargetLock::LatentTargetLock(UObject* WorldContext, FLatentActionIn
                                           float MaxDistanceToStartTargetLock, bool DoLineOfSightCheck, bool ContinuousLineOfSightCheck)
 {
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContext, EGetWorldErrorMode::ReturnNull);
+
+	if(!World)
+	{
+		if (WorldContext)
+			World = WorldContext->GetWorld();
+	}
 
 	if(!World)
 	{
@@ -74,7 +79,7 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 	}
 	
 	//we clamp the value to be 0.1 (100 fps) in order to keep uncontrollable spins from happening
-	float DeltaTime = std::min(Response.ElapsedTime(), 0.1f);
+	float DeltaTime = FMath::Min(Response.ElapsedTime(), 0.1f);
 
 	const FVector CameraLocation = CameraComponent->GetComponentLocation();
 	const FVector TargetLocation = CameraLockTarget->GetActorLocation();
@@ -104,19 +109,6 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 	const FRotator TargetHardRotator = UKismetMathLibrary::FindLookAtRotation(CameraLocation, CameraLocation + ProjectedVector + HardRotationLookAtTarget);
 
 	APlayerController* Controller = UGameplayStatics::GetPlayerController(CameraLockTarget, 0);
-	
-#if WITH_EDITOR && DEBUG_ENABLED
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, "Angle: " + FString::SanitizeFloat(Angle));
-
-		DrawDebugLine(CameraComponent->GetWorld(), CameraLocation + (FVector::DownVector * 100), CameraLocation + (CameraDirection)+(FVector::DownVector * 100), FColor::Blue, false, 0, 0, 10);
-		DrawDebugLine(CameraComponent->GetWorld(), CameraLocation + (FVector::DownVector * 100), TargetLocation, FColor::Red, false, 0, 0, 5);
-		DrawDebugLine(CameraComponent->GetWorld(), CameraLocation + (FVector::DownVector * 100) + ProjectedVector, CameraLocation + ProjectedVector + (NormalizedAngledDirection * DistFromProjectedToTarget), FColor::Green, false, 0, 0, 10);
-
-		DrawDebugSphere(CameraComponent->GetWorld(), CameraLocation + (FVector::DownVector * 100) + ProjectedVector, 10, 16, FColor::Magenta, false, 0, 0, 10);
-	}
-#endif
 
 	if (Angle >= MaxAngleToTarget)
 	{
@@ -132,15 +124,6 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 		float CalcPitch = TargetHardRotator.Pitch - ControllerPitch;
 		CalcPitch *= -DeltaTime * HardRotateSpeedMultiplier;
 		Controller->SetControlRotation(FRotator(-CalcPitch, CalcYaw, 0) + Controller->GetControlRotation());
-		
-		//debug prints and stuff
-#if WITH_EDITOR && DEBUG_ENABLED
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "Hard Rotate Camera");
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, FString::SanitizeFloat(Angle));
-		}
-#endif
 	}
 
 	if (Angle >= AngleToStartLerp) //This -0.5 is to be able to rotate the camera
@@ -160,22 +143,6 @@ void FLatentTargetLock::LerpTargetLocked(FLatentResponse& Response)
 		CalcPitch *= -RotateSpeed * DeltaTime;
 
 		Controller->SetControlRotation(FRotator(-CalcPitch, CalcYaw, 0) + Controller->GetControlRotation());
-		
-		//debug prints
-#if WITH_EDITOR && DEBUG_ENABLED
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Black, "------------");
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "Controller Yaw: " + FString::SanitizeFloat(Controller->GetControlRotation().Yaw));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Cyan, "Target Yaw: " + FString::SanitizeFloat(TargetSoftRotator.Yaw));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, "Adding Yaw: " + FString::SanitizeFloat(CalcYaw));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, " ");
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "Controller Pitch: " + FString::SanitizeFloat(Controller->GetControlRotation().Pitch));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Cyan, "Target Pitch: " + FString::SanitizeFloat(TargetSoftRotator.Pitch));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, "Adding Pitch: " + FString::SanitizeFloat(CalcPitch));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Black, "------------");
-		}
-#endif
 	}
 
 	UpdateTargetLock(Response);

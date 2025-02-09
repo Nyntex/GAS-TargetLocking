@@ -5,9 +5,8 @@
 #include "TargetLockUtilities.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Engine/World.h"
 #include "Kismet/KismetSystemLibrary.h"
-
-#define DEBUG_ENABLED true
 
 UGASTask_TargetLock::UGASTask_TargetLock(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -137,12 +136,6 @@ void UGASTask_TargetLock::SetupTargetLock(UCameraComponent* OptionalCam, AActor*
 
 	//Apply Lock Target, if this is still null here it will end the task at the start of the first tick
 	CameraLockTarget = Target;
-#if WITH_EDITOR
-	if (GEngine && DEBUG_ENABLED)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "GAMEPLAY TASK ACTIVATED");
-	}
-#endif
 }
 
 void UGASTask_TargetLock::LerpTargetLocked(double DeltaTime)
@@ -207,21 +200,6 @@ void UGASTask_TargetLock::LerpTargetLocked(double DeltaTime)
 	const FRotator TargetHardRotator = UKismetMathLibrary::FindLookAtRotation(CameraLocation, CameraLocation + ProjectedVector + HardRotationLookAtTarget);
 
 	APlayerController* Controller = UGameplayStatics::GetPlayerController(this, 0);
-	
-#if WITH_EDITOR
-	if (GEngine && DEBUG_ENABLED)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Green, "Angle: " + FString::SanitizeFloat(Angle));
-		//GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Blue, "Asin(Angle - MaxAngle): " + FString::SanitizeFloat(asin((Angle - MaxAngleToTarget) * (PI / 180))));
-		//GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, );
-
-		DrawDebugLine(GetWorld(), CameraLocation + (FVector::DownVector * 100), CameraLocation + (CameraDirection)+(FVector::DownVector * 100), FColor::Blue, false, 0, 0, 10);
-		DrawDebugLine(GetWorld(), CameraLocation + (FVector::DownVector * 100), TargetLocation, FColor::Red, false, 0, 0, 5);
-		DrawDebugLine(GetWorld(), CameraLocation + (FVector::DownVector * 100) + ProjectedVector, CameraLocation + ProjectedVector + (NormalizedAngledDirection * DistFromProjectedToTarget), FColor::Green, false, 0, 0, 10);
-
-		DrawDebugSphere(GetWorld(), CameraLocation + (FVector::DownVector * 100) + ProjectedVector, 10, 16, FColor::Magenta, false, 0, 0, 10);
-	}
-#endif
 
 	//Do the hard rotation, if needed based on our look at angle to the target
 	if (Angle >= Configuration.MaxAngleToTarget)
@@ -239,20 +217,11 @@ void UGASTask_TargetLock::LerpTargetLocked(double DeltaTime)
 		//Forcefully rotate Camera
 		Controller->SetControlRotation(Controller->GetControlRotation() + FRotator(CalcPitch, CalcYaw, 0));
 		
-		//debug prints and stuff
-#if WITH_EDITOR
-		if (GEngine && DEBUG_ENABLED)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, FString::SanitizeFloat(Angle));
-		}
-#endif
 	}
 	
 	//Do the smooth rotation towards the target
 	if (Angle >= Configuration.AngleToStartLerp)
 	{
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "Hard Rotate Camera");
-
 		//Make smooth yaw input
 		const float TargetYaw = TargetSoftRotator.Yaw;
 		float ControllerYaw = Controller->GetControlRotation().Yaw;
@@ -266,23 +235,6 @@ void UGASTask_TargetLock::LerpTargetLocked(double DeltaTime)
 		CalcPitch *= Configuration.RotateSpeed * DeltaTime;
 
 		Controller->SetControlRotation(Controller->GetControlRotation() + FRotator(CalcPitch, CalcYaw, 0));
-		
-		//debug prints
-#if WITH_EDITOR
-		if (GEngine && DEBUG_ENABLED)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Black, "------------");
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "Controller Yaw: " + FString::SanitizeFloat(ControllerYaw));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Cyan, "Target Yaw: " + FString::SanitizeFloat(TargetYaw));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, "Adding Yaw: " + FString::SanitizeFloat(CalcYaw));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, " ");
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, "Controller Pitch: " + FString::SanitizeFloat(ControllerPitch));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Cyan, "Target Pitch: " + FString::SanitizeFloat(TargetPitch));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Yellow, "Adding Pitch: " + FString::SanitizeFloat(CalcPitch));
-			GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Black, "------------");
-		}
-#endif
-
 	}
 }
 
